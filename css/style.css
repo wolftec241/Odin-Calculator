@@ -24,7 +24,9 @@
 }
 
 #screen > output{
-    display: block;
+    display: flex;
+    flex-flow: column wrap;
+    width: 45vh;
 }
 
 
