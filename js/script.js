@@ -5,41 +5,15 @@ const result = document.getElementById("result");
 let arrFunc = []; //Array the will contain the function that user make 
 
 
-
-function add(num1, num2){
-    return num1+num2;
-}
-
-function subtract(num1, num2){
-    return num1-num2;
-}
-
-function multiply(num1, num2){
-    return num1*num2;
-}
-
-function divide(num1, num2) {
-    if (num2 === 0) {
-        alert("Error: Division by zero!");
-        return NaN;
-    }
-    return num1 / num2;
-}
-
 function restartCalc(){
     arrFunc = [];
     func.innerText = '0';
     result.innerText = '0';
 }
 
-function changeCalc(funcNum, resultNum){
-    arrFunc = [];
-    func.innerText = `${funcNum}`;
-    result.innerText = `${resultNum}`;
-}
 
 
-function buttonPress(value){4
+function buttonPress(value){
     switch(value){
         case "AC": //restart the calculator
             restartCalc();
@@ -71,33 +45,52 @@ function buttonPress(value){4
                 }
                 arrFunc.push(value);
                 func.innerText += value;
-                console.log("a")
             }
             break;
+        
+        case ".": //check if last element of array is number and if it have dot
+            if(arrFunc.length > 0){
+                if(isNumeric(arrFunc[arrFunc.length - 1])
+                && !(arrFunc[arrFunc.length - 1].includes("."))){
+                    func.innerText += ".";
+                    arrFunc[arrFunc.length - 1] += ".";
+                }
+            }
+            break;
+        
         default: //If it number
             if(arrFunc[arrFunc.length - 1] === "=")
                     restartCalc();
             
             if(arrFunc.length == 0){
                 func.innerText = value;
-                arrFunc.push(parseInt(value));
+                arrFunc.push((value));
             }
-            else if(typeof arrFunc[arrFunc.length - 1] !== "number"){
-                func.innerText += parseInt(value);
-                arrFunc.push(parseInt(value));
+            else if(!isNumeric(arrFunc[arrFunc.length - 1])){
+                //If it not number
+                func.innerText += value;
+                arrFunc.push((value));
             }
             else{
-                func.innerText += parseInt(value);
-                arrFunc.push(arrFunc.pop()*10 + parseInt(value));
+                func.innerText += value;
+                arrFunc[arrFunc.length - 1] += value;
             }
             console.table(arrFunc);
-            console.log(typeof arrFunc[arrFunc.length - 1] === "number");
+            console.log(isNumeric(arrFunc[arrFunc.length - 1]));
+
+            break;
     }
 }
 
 function isOperator(value) {
     return ["+", "-", "×", "÷"].includes(value);
 }
+
+function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+  }
 
 function backspace() {
     let currentText = func.innerText;
@@ -107,7 +100,7 @@ function backspace() {
     if(arrFunc[lastIndex] === "=")
         restartCalc();
     if(arrFunc[lastIndex] >= 10)
-        arrFunc[lastIndex] = (arrFunc[lastIndex]/10).getFixed(0);
+        arrFunc[lastIndex] = (arrFunc[lastIndex]/10).toFixed(0);
     else
         arrFunc.pop();
 }
@@ -115,8 +108,11 @@ function backspace() {
 function handleParentheses(value) {
     if (value === "(") {
         // Handle open parenthesis
-        if (arrFunc.length === 0 || 
-            isOperator(arrFunc[arrFunc.length - 1])) {
+        if(arrFunc.length == 0){
+            arrFunc.push("[");
+            func.innerText = value;
+        }
+        else if (isOperator(arrFunc[arrFunc.length - 1])) {
             // If the expression is empty or the last element is an operator, add the open parenthesis
             arrFunc.push("[");
             func.innerText += value;
@@ -125,7 +121,7 @@ function handleParentheses(value) {
     else if (value === ")") {
         // Handle close parenthesis
         if (arrFunc.length > 0 && 
-            typeof arrFunc[arrFunc.length - 1] === "number") {
+            isNumeric(arrFunc[arrFunc.length - 1])) {
             // If the last element is a number, add the close parenthesis
             arrFunc.push("]");
             func.innerText += value;
@@ -135,12 +131,13 @@ function handleParentheses(value) {
 
 function calcResult() {
     if (arrFunc.length >= 3 
-        && (typeof arrFunc[arrFunc.length - 1] === "number")
+        && (isNumeric(arrFunc[arrFunc.length - 1]))
         || arrFunc[arrFunc.length - 1] === "]") {
 
             resolveParentheses();            
 
             arrFunc = calculateExpression(arrFunc);
+            arrFunc[0] = arrFunc[0].toFixed(2);
             //Returning calculation in [] for adding in the end =
 
             //Change the output of calculator and in arrFunc
@@ -204,14 +201,17 @@ function resolveNestedParentheses(expression) {
 function calculateExpression(expression) {
     //First, solve all multiply and dividing
     for(let i = 0; i < expression.length; i++){
+        //Change type of element to number 
+        if(isNumeric(expression[i])) expression[i]= parseFloat(expression[i]);
+
         if(expression[i] === "×"){
-            expression[i+1] *= expression[i-1];
-            expression.splice(i-1, 2);
+            expression[i-1] *= expression[i+1];
+            expression.splice(i, 2);
             i--;
         }
         if(expression[i] === "÷"){
-            expression[i+1] = divide(expression[i-1], expression[i+1]);
-            expression.splice(i-1, 2);
+            expression[i-1] = divide(expression[i+1], expression[i-1]);
+            expression.splice(i, 2);
             i--;
         }
     }
@@ -219,13 +219,13 @@ function calculateExpression(expression) {
     //Secondly, solve all adding and subtracting
     for(let i = 0; i < expression.length; i++){
         if(expression[i] === "+"){
-            expression[i+1] += expression[i-1];
-            expression.splice(i-1, 2);
+            expression[i-1] += expression[i+1];
+            expression.splice(i, 2);
             i--;
         }
         if(expression[i] === "-"){
-            expression[i+1] -= expression[i-1];
-            expression.splice(i-1, 2);
+            expression[i-1] -= expression[i+1];
+            expression.splice(i, 2);
             i--;
         }
     }
@@ -233,9 +233,10 @@ function calculateExpression(expression) {
     return expression; //return the result in []
 }
 
-
-function main(){   
-    
+function divide(num1, num2) {
+    if (num2 === 0) {
+        alert("Error: Division by zero!");
+        return NaN;
+    }
+    return num1 / num2;
 }
-
-main();

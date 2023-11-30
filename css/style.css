@@ -33,7 +33,7 @@
 .buttons-grid{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1vh;
+    gap: 1.5h;
     margin-inline: 1vh;
 }
 
