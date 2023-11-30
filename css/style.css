@@ -6,27 +6,32 @@
 }
 
 .calculator{
-    height: 60vh;
+    min-height: 60vh;
     width: 46vh;
-    background-color: black;
+    background-color: grey;
     padding: 2vh;
     border-radius: 25px;
 }
 
-#screen{
-    height: 10vh;
+#screen {
+    min-height: 10vh;
     width: 45vh;
     background-color: azure;
     margin-bottom: 4vh;
-    text-align: end;
-    align-items: center;
+    text-align: start;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-size: 4vh;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
 }
 
 #screen > output{
-    display: flex;
-    flex-flow: column wrap;
-    width: 45vh;
+    font-size: 4vh;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 
