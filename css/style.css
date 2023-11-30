@@ -33,7 +33,7 @@
 .buttons-grid{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1.5h;
+    gap: 1.5vh;
     margin-inline: 1vh;
 }
 
@@ -47,9 +47,3 @@
     background-color: #e0e0e0;
     transition: background-color 0.3s, transform 0.1s;
 }
-
-/*
-#equals{
-    grid-column: 3/5;
-}
-*/
